@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TodoMaster Pro - Advanced Task Management</title>
+    
+    <!-- Chart.js for analytics -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    
+    <!-- Font Awesome for icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS for styling -->
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="icon" href="./gambar/to-do-list.png" type="image/png">
+
+</head>
+<body data-theme="light">
+    <!-- Header & Navigation -->
+    <header class="header">
+        <nav class="navbar">
+            <div class="logo">
+                <i class="fas fa-tasks"></i>
+                <span>TodoMaster Pro</span>
+            </div>
+            
+            <ul class="nav-menu">
+                <li><a href="#" class="nav-link active" data-page="dashboard">Dashboard</a></li>
+                <li><a href="#" class="nav-link" data-page="add-task">Tambah Tugas</a></li>
+                <li><a href="#" class="nav-link" data-page="analytics">Analytics</a></li>
+            </ul>
+
+            <div class="nav-controls">
+                <button class="theme-toggle" id="theme-toggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <div class="hamburger" id="hamburger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Sidebar for mobile -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-tasks"></i>
+                <span>TodoMaster Pro</span>
+            </div>
+            <button class="btn btn-secondary" onclick="closeSidebar()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="#" data-page="dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+            <li><a href="#" data-page="add-task"><i class="fas fa-plus"></i> Tambah Tugas</a></li>
+            <li><a href="#" data-page="analytics"><i class="fas fa-chart-bar"></i> Analytics</a></li>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Dashboard Page -->
+        <div class="page active" id="dashboard-page">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-tasks"></i>
+                    </div>
+                    <div class="stat-value" id="total-tasks">0</div>
+                    <div class="stat-label">Total Tugas</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-value" id="completed-tasks">0</div>
+                    <div class="stat-label">Selesai</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-value" id="pending-tasks">0</div>
+                    <div class="stat-label">Tertunda</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="stat-value" id="overdue-tasks">0</div>
+                    <div class="stat-label">Terlambat</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-list"></i>
+                        Daftar Tugas
+                    </h2>
+                    <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                        <select class="form-select" style="width: auto; min-width: 120px;" id="filter-priority">
+                            <option value="">Semua Prioritas</option>
+                            <option value="high">Tinggi</option>
+                            <option value="medium">Sedang</option>
+                            <option value="low">Rendah</option>
+                        </select>
+                        <select class="form-select" style="width: auto; min-width: 120px;" id="filter-status">
+                            <option value="">Semua Status</option>
+                            <option value="pending">Belum Selesai</option>
+                            <option value="completed">Selesai</option>
+                        </select>
+                        <button class="btn btn-danger" onclick="deleteAllTasks()" id="delete-all-btn" style="display: none;">
+                            <i class="fas fa-trash-alt"></i>
+                            Hapus Semua
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="todo-list" id="todo-list">
+                        <div class="empty-state">
+                            <i class="fas fa-clipboard-list"></i>
+                            <h3>Belum Ada Tugas</h3>
+                            <p>Mulai tambahkan tugas pertama Anda!</p>
+                            <button class="btn btn-primary mt-2" onclick="navigateTo('add-task')">
+                                <i class="fas fa-plus"></i>
+                                Tambah Tugas Pertama
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Task Page -->
+        <div class="page" id="add-task-page">
+            <div class="card" style="max-width: 800px; margin: 0 auto;">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-plus"></i>
+                        Tambah Tugas Baru
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <form id="add-task-form">
+                        <div class="form-group">
+                            <label class="form-label" for="task-title">
+                                <i class="fas fa-heading"></i>
+                                Judul Tugas
+                            </label>
+                            <input type="text" class="form-input" id="task-title" placeholder="Masukkan judul tugas..." required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="task-description">
+                                <i class="fas fa-align-left"></i>
+                                Deskripsi
+                            </label>
+                            <textarea class="form-textarea" id="task-description" placeholder="Deskripsi detail tugas..." rows="4"></textarea>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                            <div class="form-group">
+                                <label class="form-label" for="task-priority">
+                                    <i class="fas fa-flag"></i>
+                                    Prioritas
+                                </label>
+                                <select class="form-select" id="task-priority" required>
+                                    <option value="low">Rendah</option>
+                                    <option value="medium" selected>Sedang</option>
+                                    <option value="high">Tinggi</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="task-difficulty">
+                                    <i class="fas fa-star"></i>
+                                    Rating Kesulitan
+                                </label>
+                                <select class="form-select" id="task-difficulty" required>
+                                    <option value="1">⭐ Sangat Mudah</option>
+                                    <option value="2">⭐⭐ Mudah</option>
+                                    <option value="3" selected>⭐⭐⭐ Sedang</option>
+                                    <option value="4">⭐⭐⭐⭐ Sulit</option>
+                                    <option value="5">⭐⭐⭐⭐⭐ Sangat Sulit</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="task-deadline">
+                                <i class="fas fa-calendar-alt"></i>
+                                Deadline
+                            </label>
+                            <input type="datetime-local" class="form-input" id="task-deadline" required>
+                        </div>
+
+                        <div style="display: flex; gap: 1rem; justify-content: flex-end; flex-wrap: wrap;">
+                            <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                                <i class="fas fa-undo"></i>
+                                Reset
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i>
+                                Simpan Tugas
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Page -->
+        <div class="page" id="analytics-page">
+            <div class="stats-grid mb-4">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-percentage"></i>
+                    </div>
+                    <div class="stat-value" id="completion-rate">0%</div>
+                    <div class="stat-label">Tingkat Penyelesaian</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-fire"></i>
+                    </div>
+                    <div class="stat-value" id="avg-difficulty">0</div>
+                    <div class="stat-label">Rata-rata Kesulitan</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <div class="stat-value" id="hardest-completed">0</div>
+                    <div class="stat-label">Tersulit Diselesaikan</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-calendar-day"></i>
+                    </div>
+                    <div class="stat-value" id="most-productive-day">-</div>
+                    <div class="stat-label">Hari Paling Produktif</div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-clock"></i>
+                            Penyelesaian per Jam
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="hourly-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-calendar-week"></i>
+                            Penyelesaian per Hari
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="daily-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-star"></i>
+                        Distribusi Tingkat Kesulitan
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="difficulty-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-medal"></i>
+                        Tugas Tersulit yang Diselesaikan
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div id="hardest-tasks-list">
+                        <div class="empty-state">
+                            <i class="fas fa-mountain"></i>
+                            <h3>Belum Ada Data</h3>
+                            <p>Selesaikan beberapa tugas untuk melihat statistik kesulitan</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Edit Task Modal -->
+    <div class="modal" id="edit-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center;">
+        <div class="modal-content" style="background: var(--bg-primary); border-radius: 1rem; padding: 0; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-lg);">
+            <div class="card-header" style="margin: 0;">
+                <h3 class="card-title">
+                    <i class="fas fa-edit"></i>
+                    Edit Tugas
+                </h3>
+                <button class="btn btn-secondary" onclick="closeEditModal()" style="padding: 0.5rem; min-width: 40px;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="card-body">
+                <form id="edit-task-form">
+                    <input type="hidden" id="edit-task-id">
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="edit-task-title">Judul Tugas</label>
+                        <input type="text" class="form-input" id="edit-task-title" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="edit-task-description">Deskripsi</label>
+                        <textarea class="form-textarea" id="edit-task-description" rows="4"></textarea>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+                        <div class="form-group">
+                            <label class="form-label" for="edit-task-priority">Prioritas</label>
+                            <select class="form-select" id="edit-task-priority" required>
+                                <option value="low">Rendah</option>
+                                <option value="medium">Sedang</option>
+                                <option value="high">Tinggi</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="edit-task-difficulty">Rating Kesulitan</label>
+                            <select class="form-select" id="edit-task-difficulty" required>
+                                <option value="1">⭐ Sangat Mudah</option>
+                                <option value="2">⭐⭐ Mudah</option>
+                                <option value="3">⭐⭐⭐ Sedang</option>
+                                <option value="4">⭐⭐⭐⭐ Sulit</option>
+                                <option value="5">⭐⭐⭐⭐⭐ Sangat Sulit</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="edit-task-deadline">Deadline</label>
+                        <input type="datetime-local" class="form-input" id="edit-task-deadline" required>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem; justify-content: flex-end; flex-wrap: wrap;">
+                        <button type="button" class="btn btn-secondary" onclick="closeEditModal()">
+                            <i class="fas fa-times"></i>
+                            Batal
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i>
+                            Simpan Perubahan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notification-container"></div>
+
+    <!-- analytics for chart.js and script.js -->
+    <script src="script.js"></script>
+</body>
+</html>
